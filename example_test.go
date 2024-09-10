@@ -1,12 +1,10 @@
-package client_test
+package influxdb1_client_ys_test
 
 import (
 	"fmt"
 	"math/rand"
 	"os"
 	"time"
-
-	"github.com/influxdata/influxdb1-client/v2"
 )
 
 // Create a new client

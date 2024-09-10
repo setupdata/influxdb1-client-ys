@@ -1,4 +1,4 @@
-package client
+package influxdb1_client_ys
 
 import (
 	"encoding/json"
