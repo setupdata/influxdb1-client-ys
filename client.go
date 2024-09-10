@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -17,7 +18,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/influxdata/influxdb1-client/models"
 )
 
@@ -589,7 +589,7 @@ func (c *client) Query(q Query) (*Response, error) {
 			}
 		}
 	} else {
-		dec := sonic.ConfigDefault.NewDecoder(resp.Body)
+		dec := json.NewDecoder(resp.Body)
 		dec.UseNumber()
 		decErr := dec.Decode(&response)
 
@@ -666,7 +666,7 @@ func (c *client) createDefaultRequest(q Query) (*http.Request, error) {
 	u := c.url
 	u.Path = path.Join(u.Path, "query")
 
-	jsonParameters, err := sonic.Marshal(q.Parameters)
+	jsonParameters, err := json.Marshal(q.Parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -723,7 +723,7 @@ func (r *duplexReader) Close() error {
 // ChunkedResponse represents a response from the server that
 // uses chunking to stream the output.
 type ChunkedResponse struct {
-	dec    sonic.Decoder
+	dec    *json.Decoder
 	duplex *duplexReader
 	buf    bytes.Buffer
 }
@@ -736,7 +736,7 @@ func NewChunkedResponse(r io.Reader) *ChunkedResponse {
 	}
 	resp := &ChunkedResponse{}
 	resp.duplex = &duplexReader{r: rc, w: &resp.buf}
-	resp.dec = sonic.ConfigDefault.NewDecoder(resp.duplex)
+	resp.dec = json.NewDecoder(resp.duplex)
 	resp.dec.UseNumber()
 	return resp
 }
